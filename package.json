@@ -1,0 +1,38 @@
+{
+  "name": "easymedpro",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@types/node": "^24.1.0",
+    "antd": "^5.26.7",
+    "dotenv": "^17.2.1",
+    "i18next": "^25.3.2",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "lucide-react": "^0.526.0",
+    "mongodb": "^6.18.0",
+    "openai": "^5.10.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^15.6.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
+  }
+}

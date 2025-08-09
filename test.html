@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EasyMed Test Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .test-section {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .lang-btn {
+        background: #4caf50;
+        color: white;
+      }
+      .lang-btn.active {
+        background: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🏥 EasyMed Healthcare Platform - Test Page</h1>
+
+      <div class="test-section">
+        <h2>🌐 Language Translation Test</h2>
+        <p>Current Language: <span id="currentLang">English</span></p>
+
+        <div>
+          <button class="lang-btn active" onclick="setLanguage('english')">
+            English
+          </button>
+          <button class="lang-btn" onclick="setLanguage('hindi')">Hindi</button>
+          <button class="lang-btn" onclick="setLanguage('tamil')">Tamil</button>
+        </div>
+
+        <div style="margin-top: 15px">
+          <strong>Translation Test:</strong>
+          <ul>
+            <li>Welcome: <span id="welcome">Welcome to EasyMed</span></li>
+            <li>Dashboard: <span id="dashboard">Dashboard</span></li>
+            <li>Appointments: <span id="appointments">Appointments</span></li>
+            <li>Emergency: <span id="emergency">Emergency</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>🎤 Voice Assistant Test</h2>
+        <button
+          onclick="testVoice()"
+          style="background: #2196f3; color: white; font-size: 16px"
+        >
+          🎤 Test Voice Recognition
+        </button>
+        <p id="voiceStatus">Click the button to test voice recognition</p>
+      </div>
+
+      <div class="test-section">
+        <h2>✅ System Status</h2>
+        <p>✅ HTML Page Loading: <strong>Working</strong></p>
+        <p>✅ CSS Styles: <strong>Working</strong></p>
+        <p>✅ JavaScript: <strong>Working</strong></p>
+        <p>🔄 React App: <em>Testing...</em></p>
+      </div>
+    </div>
+
+    <script>
+      const translations = {
+        english: {
+          welcome: "Welcome to EasyMed",
+          dashboard: "Dashboard",
+          appointments: "Appointments",
+          emergency: "Emergency",
+        },
+        hindi: {
+          welcome: "EasyMed में आपका स्वागत है",
+          dashboard: "डैशबोर्ड",
+          appointments: "अपॉइंटमेंट",
+          emergency: "आपातकाल",
+        },
+        tamil: {
+          welcome: "EasyMed இல் உங்களை வரவேற்கிறோம்",
+          dashboard: "டாஷ்போர்டு",
+          appointments: "அப்பாயிண்ட்மெண்ட்கள்",
+          emergency: "அவசரநிலை",
+        },
+      };
+
+      function setLanguage(lang) {
+        document.getElementById("currentLang").textContent =
+          lang.charAt(0).toUpperCase() + lang.slice(1);
+
+        // Update translations
+        const trans = translations[lang];
+        document.getElementById("welcome").textContent = trans.welcome;
+        document.getElementById("dashboard").textContent = trans.dashboard;
+        document.getElementById("appointments").textContent =
+          trans.appointments;
+        document.getElementById("emergency").textContent = trans.emergency;
+
+        // Update button states
+        document
+          .querySelectorAll(".lang-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        event.target.classList.add("active");
+
+        console.log("Language changed to:", lang);
+      }
+
+      function testVoice() {
+        const status = document.getElementById("voiceStatus");
+
+        if (
+          "webkitSpeechRecognition" in window ||
+          "SpeechRecognition" in window
+        ) {
+          status.textContent =
+            "🎤 Voice recognition is supported! Ready to test.";
+          status.style.color = "#4CAF50";
+
+          // Test speech synthesis
+          if ("speechSynthesis" in window) {
+            const utterance = new SpeechSynthesisUtterance(
+              "Hello! Voice assistant is working.",
+            );
+            speechSynthesis.speak(utterance);
+          }
+        } else {
+          status.textContent =
+            "❌ Voice recognition not supported in this browser.";
+          status.style.color = "#f44336";
+        }
+      }
+
+      // Test if we can load the main React app
+      setTimeout(() => {
+        if (document.querySelector("#root")) {
+          console.log("React root element found");
+        } else {
+          console.log("React app not loaded");
+        }
+      }, 2000);
+    </script>
+  </body>
+</html>

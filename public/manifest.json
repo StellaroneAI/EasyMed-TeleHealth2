@@ -1,0 +1,97 @@
+{
+  "name": "EasyMedPro - AI Healthcare Platform",
+  "short_name": "EasyMedPro",
+  "description": "Comprehensive AI-powered healthcare platform with multilingual support, IoT integration, and personalized wellness coaching",
+  "theme_color": "#10B981",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "categories": ["health", "medical", "wellness"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Emergency Alert",
+      "short_name": "Emergency",
+      "description": "Quick access to emergency services",
+      "url": "/?shortcut=emergency"
+    },
+    {
+      "name": "Symptom Checker",
+      "short_name": "Symptoms",
+      "description": "AI-powered symptom analysis",
+      "url": "/?shortcut=symptoms"
+    },
+    {
+      "name": "Medication Reminder",
+      "short_name": "Medications",
+      "description": "View and manage medications",
+      "url": "/?shortcut=medications"
+    },
+    {
+      "name": "Health Analytics",
+      "short_name": "Analytics",
+      "description": "View health trends and insights",
+      "url": "/?shortcut=analytics"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.easymedpro.app",
+      "id": "com.easymedpro.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/easymedpro/id123456789",
+      "id": "123456789"
+    }
+  ],
+  "prefer_related_applications": false,
+  "protocol_handlers": [
+    {
+      "protocol": "tel",
+      "url": "/emergency?tel=%s"
+    },
+    {
+      "protocol": "mailto",
+      "url": "/contact?email=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/import",
+      "accept": {
+        "application/json": [".json"],
+        "text/csv": [".csv"],
+        "application/pdf": [".pdf"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "health_reports",
+          "accept": ["image/*", "application/pdf"]
+        }
+      ]
+    }
+  },
+  "screenshots": []
+}

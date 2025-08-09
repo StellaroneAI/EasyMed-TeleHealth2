@@ -1,0 +1,460 @@
+import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+
+interface VoiceAssistantProps {
+  userName?: string;
+  onCommand?: (command: string, language: string) => void;
+}
+
+export default function VoiceAssistant({ userName = "Rajesh", on  // Process voice commands with enhanced multilingual responses
+  const processVoiceCommand = (command: string) => {
+    const lowerCommand = command.toLowerCase();
+    let responseText = '';
+    let navigationSection = '';
+
+    console.log(`Processing voice command: "${command}" in ${currentLanguage}`);
+
+    // Command processing in multiple languages with proper responses
+    if (lowerCommand.includes('appointment') || lowerCommand.includes('book') || 
+        lowerCommand.includes('अपॉइंटमेंट') || lowerCommand.includes('बुक') ||
+        lowerCommand.includes('சந்திப்பு') || lowerCommand.includes('முன்பதிவு')) {
+      
+      if (currentLanguage === 'hindi') {
+        responseText = 'अपॉइंटमेंट बुकिंग खोल रहा हूं।';
+      } else if (currentLanguage === 'tamil') {
+        responseText = 'அப்பாயின்ட்மென்ட் बुकिंग तिरैक्किरेन्।';
+      } else {
+        responseText = getVoiceCommand('goToAppointments') || 'Opening appointments for you.';
+      }
+      navigationSection = 'appointments';
+    }
+    else if (lowerCommand.includes('medicine') || lowerCommand.includes('medication') ||
+             lowerCommand.includes('दवा') || lowerCommand.includes('औषधि') ||
+             lowerCommand.includes('மருந்து')) {
+      
+      if (currentLanguage === 'hindi') {
+        responseText = 'आपकी दवाइयां दिखा रहा हूं।';
+      } else if (currentLanguage === 'tamil') {
+        responseText = 'உங்கள் மருந்துகளை காட்டுகிறேன்।';
+      } else {
+        responseText = getVoiceCommand('medicationReminder') || 'Showing your medications.';
+      }
+      navigationSection = 'healthRecords';
+    }istantProps) {
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [response, setResponse] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { getVoiceCommand, currentLanguage } = useLanguage();
+
+  // Get current time greeting
+  const getTimeGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'goodMorning';
+    if (hour < 17) return 'goodAfternoon';
+    return 'goodEvening';
+  };
+
+  // Speak text using Web Speech API with enhanced Tamil support
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Set language based on current language with enhanced support
+      const langCodes = {
+        english: 'en-US',
+        hindi: 'hi-IN',
+        tamil: 'ta-IN',
+        telugu: 'te-IN',
+        bengali: 'bn-IN',
+        marathi: 'mr-IN',
+        punjabi: 'pa-IN'
+      };
+      
+      const selectedLangCode = langCodes[currentLanguage as keyof typeof langCodes] || 'en-US';
+      utterance.lang = selectedLangCode;
+      utterance.rate = 0.8;
+      utterance.pitch = 1;
+      utterance.volume = 0.9;
+      
+      console.log(`Attempting to speak in ${currentLanguage} (${selectedLangCode}): "${text}"`);
+      
+      // Wait for voices to load and pick the best voice for the language
+      const setVoiceAndSpeak = () => {
+        const voices = speechSynthesis.getVoices();
+        console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+        console.log(`Trying to select voice for language: ${currentLanguage} (${selectedLangCode})`);
+        
+        let selectedVoice = null;
+        const targetLang = selectedLangCode;
+        const langPrefix = targetLang.split('-')[0]; // e.g., 'ta' from 'ta-IN'
+        
+        // Enhanced voice selection for Tamil and other languages
+        if (currentLanguage === 'tamil') {
+          console.log('Searching for Tamil voices...');
+          // Try to find Tamil voices with different approaches
+          selectedVoice = voices.find(voice => 
+            voice.lang.toLowerCase().includes('ta-in') || 
+            voice.lang.toLowerCase().includes('ta_in') ||
+            voice.lang.toLowerCase().startsWith('ta') ||
+            voice.name.toLowerCase().includes('tamil')
+          );
+          
+          console.log('Tamil voice found:', selectedVoice ? `${selectedVoice.name} (${selectedVoice.lang})` : 'None');
+          
+          // Fallback to any Indian English voice if no Tamil voice found
+          if (!selectedVoice) {
+            console.log('No Tamil voice found, trying Indian English...');
+            selectedVoice = voices.find(voice => 
+              voice.lang.includes('en-IN') || 
+              voice.name.toLowerCase().includes('indian')
+            );
+            console.log('Indian English voice found:', selectedVoice ? `${selectedVoice.name} (${selectedVoice.lang})` : 'None');
+          }
+          
+          // Ultimate fallback to any English voice
+          if (!selectedVoice) {
+            console.log('No Indian English found, trying any English voice...');
+            selectedVoice = voices.find(voice => 
+              voice.lang.startsWith('en-') ||
+              voice.lang.toLowerCase().includes('english')
+            );
+            console.log('English voice found:', selectedVoice ? `${selectedVoice.name} (${selectedVoice.lang})` : 'None');
+          }
+        } else if (currentLanguage === 'hindi') {
+          selectedVoice = voices.find(voice => 
+            voice.lang.toLowerCase().includes('hi-in') || 
+            voice.lang.toLowerCase().includes('hi_in') ||
+            voice.lang.toLowerCase().startsWith('hi') ||
+            voice.name.toLowerCase().includes('hindi')
+          );
+        } else {
+          // For other languages, try exact match first, then prefix match
+          selectedVoice = voices.find(voice => voice.lang === targetLang) ||
+                         voices.find(voice => voice.lang.startsWith(langPrefix));
+        }
+        
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+          console.log(`✅ Selected voice: ${selectedVoice.name} (${selectedVoice.lang}) for ${currentLanguage}`);
+        } else {
+          console.log(`⚠️ No specific voice found for ${currentLanguage}, using default`);
+        }
+        
+        // Add error handling for speech synthesis
+        utterance.onerror = (event) => {
+          console.error('Speech synthesis error:', event);
+          // Try fallback with English if original language fails
+          if (selectedLangCode !== 'en-US') {
+            console.log('Retrying with English...');
+            const fallbackUtterance = new SpeechSynthesisUtterance(text);
+            fallbackUtterance.lang = 'en-US';
+            fallbackUtterance.rate = 0.8;
+            speechSynthesis.speak(fallbackUtterance);
+          }
+        };
+        
+        utterance.onstart = () => {
+          console.log(`🗣️ Speaking: "${text}" in ${currentLanguage}`);
+        };
+        
+        utterance.onend = () => {
+          console.log(`✅ Finished speaking in ${currentLanguage}`);
+        };
+        
+        console.log(`Speaking in ${selectedLangCode}:`, text);
+        speechSynthesis.speak(utterance);
+      };
+      
+      // If voices are already loaded, use them immediately
+      if (speechSynthesis.getVoices().length > 0) {
+        setVoiceAndSpeak();
+      } else {
+        // Wait for voices to load
+        speechSynthesis.addEventListener('voiceschanged', setVoiceAndSpeak, { once: true });
+        
+        // Fallback timeout in case voiceschanged never fires
+        setTimeout(() => {
+          if (speechSynthesis.getVoices().length > 0) {
+            setVoiceAndSpeak();
+          }
+        }, 100);
+      }
+    }
+  };
+
+  // Generate personalized greeting
+  const generateGreeting = () => {
+    const timeGreeting = getTimeGreeting();
+    const greetingTexts = {
+      english: {
+        goodMorning: `Good morning ${userName}! I'm your EasyMed AI assistant. How can I help you with your health today?`,
+        goodAfternoon: `Good afternoon ${userName}! I'm here to assist you with any health questions or concerns.`,
+        goodEvening: `Good evening ${userName}! How are you feeling today? I'm here to help with your health needs.`
+      },
+      hindi: {
+        goodMorning: `सुप्रभात ${userName}! मैं आपका EasyMed AI सहायक हूं। आज मैं आपकी स्वास्थ्य में कैसे मदद कर सकता हूं?`,
+        goodAfternoon: `नमस्कार ${userName}! मैं आपके किसी भी स्वास्थ्य प्रश्न या चिंता में सहायता के लिए यहां हूं।`,
+        goodEvening: `शुभ संध्या ${userName}! आज आप कैसा महसूस कर रहे हैं? मैं आपकी स्वास्थ्य आवश्यकताओं में मदद के लिए यहां हूं।`
+      },
+      tamil: {
+        goodMorning: `காலை வணக்கம் ${userName}! நான் உங்கள் EasyMed AI உதவியாளர். இன்று உங்கள் சுகாதாரத்தில் நான் எப்படி உதவ முடியும்?`,
+        goodAfternoon: `மதியம் வணக்கம் ${userName}! உங்கள் எந்த சுகாதார கேள்விகள் அல்லது கவலைகளிலும் உதவ நான் இங்கே இருக்கிறேன்.`,
+        goodEvening: `மாலை வணக்கம் ${userName}! இன்று நீங்கள் எப்படி உணர்கிறீர்கள்? உங்கள் சுகாதார தேவைகளில் உதவ நான் இங்கே இருக்கிறேன்.`
+      },
+      telugu: {
+        goodMorning: `శుభోదయం ${userName}! నేను మీ EasyMed AI సహాయకుడిని. ఈరోజు మీ ఆరోగ్యంలో నేను ఎలా సహాయం చేయగలను?`,
+        goodAfternoon: `నమస్కారం ${userName}! మీ ఏవైనా ఆరోగ్య ప్రశ్నలు లేదా ఆందోళనలలో సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను.`,
+        goodEvening: `శుభ సాయంత్రం ${userName}! ఈరోజు మీరు ఎలా అనుభవిస్తున్నారు? మీ ఆరోగ్య అవసరాలలో సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను.`
+      },
+      bengali: {
+        goodMorning: `সুপ্রভাত ${userName}! আমি আপনার EasyMed AI সহায়ক। আজ আমি আপনার স্বাস্থ্যের ব্যাপারে কীভাবে সাহায্য করতে পারি?`,
+        goodAfternoon: `নমস্কার ${userName}! আপনার যেকোনো স্বাস্থ্য প্রশ্ন বা উদ্বেগের জন্য আমি এখানে আছি।`,
+        goodEvening: `শুভ সন্ধ্যা ${userName}! আজ আপনি কেমন অনুভব করছেন? আপনার স্বাস্থ্য প্রয়োজনে সাহায্য করতে আমি এখানে আছি।`
+      },
+      marathi: {
+        goodMorning: `सुप्रभात ${userName}! मी तुमचा EasyMed AI सहाय्यक आहे। आज मी तुमच्या आरोग्यात कशी मदत करू शकतो?`,
+        goodAfternoon: `नमस्कार ${userName}! तुमच्या कोणत्याही आरोग्य प्रश्नांसाठी किंवा चिंतेसाठी मी येथे आहे।`,
+        goodEvening: `शुभ संध्याकाळ ${userName}! आज तुम्ही कसे वाटत आहात? तुमच्या आरोग्य गरजांमध्ये मदत करण्यासाठी मी येथे आहे।`
+      },
+      punjabi: {
+        goodMorning: `ਸਤ ਸ੍ਰੀ ਅਕਾਲ ${userName}! ਮੈਂ ਤੁਹਾਡਾ EasyMed AI ਸਹਾਇਕ ਹਾਂ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਸਿਹਤ ਵਿੱਚ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?`,
+        goodAfternoon: `ਸਤ ਸ੍ਰੀ ਅਕਾਲ ${userName}! ਤੁਹਾਡੇ ਕਿਸੇ ਵੀ ਸਿਹਤ ਸਬੰਧੀ ਸਵਾਲ ਜਾਂ ਚਿੰਤਾ ਲਈ ਮੈਂ ਇੱਥੇ ਹਾਂ।`,
+        goodEvening: `ਸ਼ੁਭ ਸ਼ਾਮ ${userName}! ਅੱਜ ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ? ਤੁਹਾਡੀਆਂ ਸਿਹਤ ਲੋੜਾਂ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ ਮੈਂ ਇੱਥੇ ਹਾਂ।`
+      }
+    };
+    
+    const langGreetings = greetingTexts[currentLanguage as keyof typeof greetingTexts] || greetingTexts.english;
+    return langGreetings[timeGreeting as keyof typeof langGreetings];
+  };
+
+  // Start voice recognition with enhanced multilingual support
+  const startVoiceRecognition = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      const recognition = new SpeechRecognition();
+      
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 3;
+      
+      // Set language for recognition with fallback
+      const langCodes = {
+        english: 'en-US',
+        hindi: 'hi-IN',
+        tamil: 'ta-IN',
+        telugu: 'te-IN',
+        bengali: 'bn-IN',
+        marathi: 'mr-IN',
+        punjabi: 'pa-IN'
+      };
+      
+      const selectedLang = langCodes[currentLanguage as keyof typeof langCodes] || 'en-US';
+      recognition.lang = selectedLang;
+      
+      console.log(`Voice recognition started in ${currentLanguage} (${selectedLang})`);
+      
+      recognition.onstart = () => {
+        setIsListening(true);
+        setTranscript('');
+        
+        const startMsg = currentLanguage === 'hindi' ? 'सुन रहा हूं...' :
+                        currentLanguage === 'tamil' ? 'கேट্টুকোন্ডিরুক্কেন্...' :
+                        'Listening...';
+        setResponse(startMsg);
+      };
+      
+      recognition.onresult = (event: any) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        
+        const currentTranscript = finalTranscript || interimTranscript;
+        setTranscript(currentTranscript);
+        
+        if (finalTranscript) {
+          console.log(`Voice command received: "${finalTranscript}" in ${currentLanguage}`);
+          processVoiceCommand(finalTranscript);
+        }
+      };
+      
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        
+        const errorMsg = currentLanguage === 'hindi' ? 'माफ करें, मैं समझ नहीं पाया। कृपया दोबारा कोशिश करें।' :
+                        currentLanguage === 'tamil' ? 'মাফ् করুঙ্গল্, এনক্কু পুরিয়বিল্লৈ। মীण্डুম् সোল্লুঙ্গল্।' :
+                        'Sorry, I couldn\'t understand that. Please try again.';
+        setResponse(errorMsg);
+        speakText(errorMsg);
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognition.start();
+    } else {
+      const notSupportedMsg = currentLanguage === 'hindi' ? 'आवाज पहचान इस ब्राउज़र में समर्थित नहीं है।' :
+                             currentLanguage === 'tamil' ? 'কুরল् পুরিন্তল् ই ব্রাউজরিল् অनुমতি इल্লৈ।' :
+                             'Voice recognition is not supported in this browser.';
+      alert(notSupportedMsg);
+    }
+  };
+
+  // Process voice commands
+  const processVoiceCommand = (command: string) => {
+    const lowerCommand = command.toLowerCase();
+    let responseText = '';
+    let navigationSection = '';
+
+    // Command processing in multiple languages
+    if (lowerCommand.includes('appointment') || lowerCommand.includes('book') || 
+        lowerCommand.includes('अपॉइंटमेंट') || lowerCommand.includes('बुक') ||
+        lowerCommand.includes('சந்திப்பு') || lowerCommand.includes('முன்பதிவு')) {
+      responseText = getVoiceCommand('goToAppointments') || 'Opening appointments for you.';
+      navigationSection = 'appointments';
+    }
+    else if (lowerCommand.includes('medicine') || lowerCommand.includes('medication') ||
+             lowerCommand.includes('दवा') || lowerCommand.includes('औषधि') ||
+             lowerCommand.includes('மருந்து')) {
+      responseText = getVoiceCommand('medicationReminder') || 'Showing your medications.';
+      navigationSection = 'healthRecords';
+    }
+    else if (lowerCommand.includes('emergency') || lowerCommand.includes('help') ||
+             lowerCommand.includes('आपातकाल') || lowerCommand.includes('मदद') ||
+             lowerCommand.includes('அவசரம்') || lowerCommand.includes('உதவி')) {
+      responseText = getVoiceCommand('emergency') || 'Connecting you to emergency services.';
+      navigationSection = 'emergency';
+    }
+    else if (lowerCommand.includes('vitals') || lowerCommand.includes('health') ||
+             lowerCommand.includes('वाइटल') || lowerCommand.includes('स्वास्थ्य') ||
+             lowerCommand.includes('உயிர்ச்சक்தி') || lowerCommand.includes('சுகாதாரம்')) {
+      responseText = 'Opening your health vitals.';
+      navigationSection = 'vitalsMonitoring';
+    }
+    else if (lowerCommand.includes('family') || lowerCommand.includes('परिवार') || lowerCommand.includes('குடும்பம்')) {
+      responseText = getVoiceCommand('familyHealthNav') || 'Showing family health overview.';
+      navigationSection = 'familyHealth';
+    }
+    else if (lowerCommand.includes('chat') || lowerCommand.includes('ai') || 
+             lowerCommand.includes('चैट') || lowerCommand.includes('एआई') ||
+             lowerCommand.includes('அரட்டை') || lowerCommand.includes('செயற்கை நுண்ணறிவு')) {
+      responseText = 'Opening AI chat assistant.';
+      navigationSection = 'aiChat';
+    }
+    else if (lowerCommand.includes('dashboard') || lowerCommand.includes('home') ||
+             lowerCommand.includes('डैशबोर्ड') || lowerCommand.includes('होम') ||
+             lowerCommand.includes('முகப்பு')) {
+      responseText = 'Going to dashboard.';
+      navigationSection = 'dashboard';
+    }
+    else if (lowerCommand.includes('education') || lowerCommand.includes('learn') ||
+             lowerCommand.includes('शिक्षा') || lowerCommand.includes('सीखें') ||
+             lowerCommand.includes('கல்வி')) {
+      responseText = 'Opening health education.';
+      navigationSection = 'education';
+    }
+    else if (lowerCommand.includes('asha') || lowerCommand.includes('worker') ||
+             lowerCommand.includes('आशा') || lowerCommand.includes('वर्कर')) {
+      responseText = 'Opening ASHA worker hub.';
+      navigationSection = 'ashaWorker';
+    }
+    else {
+      // Enhanced multilingual default responses
+      const defaultResponses = {
+        english: `I heard "${command}" but didn't understand completely. Try saying "emergency", "book appointment", "check medicine", "family health", "check vitals", or "open chat".`,
+        hindi: `मैंने "${command}" सुना लेकिन पूरी तरह समझ नहीं पाया। "आपातकाल", "अपॉइंटमेंट बुक करें", "दवाई चेक करें", "पारिवारिक स्वास्थ्य", "वाइटल्स चेक करें", या "चैट खोलें" कहने की कोशिश करें।`,
+        tamil: `நான் "${command}" கேட்டேன் ஆனால் முழுமையாக புரியவில்லை। "அவசரம்", "அப்பாயின்மென்ட் புக்", "மருந்து சரிபார்க்க", "குடும்ப ஆரோக்கியம்", "உயிர்ச்சக்தி சரிபார்க்க", அல்லது "அரட்டை திற" சொல்லி முயற்சிக்கவும்।`
+      };
+      
+      responseText = defaultResponses[currentLanguage as keyof typeof defaultResponses] || defaultResponses.english;
+    }
+
+    setResponse(responseText);
+    speakText(responseText);
+
+    // Trigger navigation if command recognized and callback provided
+    if (navigationSection && onCommand) {
+      onCommand(navigationSection, currentLanguage);
+    }
+  };
+
+  const handleVoiceCommand = () => {
+    if (!isInitialized) {
+      // First click - give greeting
+      const greeting = generateGreeting();
+      setResponse(greeting);
+      speakText(greeting);
+      setIsInitialized(true);
+    } else if (!isListening) {
+      // Start listening for commands
+      startVoiceRecognition();
+    } else {
+      // Stop listening
+      setIsListening(false);
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+      }
+    }
+  };
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50">
+      {/* Voice Assistant Dialog - Mobile Optimized */}
+      {(isListening || response) && (
+        <div className="mb-4 bg-white/95 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20 shadow-lg max-w-[280px] sm:max-w-xs">
+          {isListening && (
+            <div className="flex items-center space-x-2 text-blue-600">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium">Listening...</span>
+            </div>
+          )}
+          {transcript && (
+            <div className="mb-2">
+              <p className="text-xs text-gray-600 font-medium">You said:</p>
+              <p className="text-sm font-medium">{transcript}</p>
+            </div>
+          )}
+          {response && (
+            <div>
+              <p className="text-xs text-gray-600 font-medium">EasyMed AI:</p>
+              <p className="text-sm leading-relaxed">{response}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Voice Button - Touch Optimized */}
+      <button 
+        onClick={handleVoiceCommand}
+        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg transition-all flex items-center justify-center touch-manipulation active:scale-95 ${
+          isListening 
+            ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
+            : 'bg-blue-600 hover:bg-blue-700'
+        }`}
+        aria-label="Voice Assistant"
+      >
+        <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" 
+          />
+        </svg>
+      </button>
+    </div>
+  );
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+    <style>
+        .icon-container {
+            display: inline-block;
+            margin: 10px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>EasyMedPro Icon Generator</h1>
+    
+    <div class="icon-container">
+        <canvas id="icon192" width="192" height="192"></canvas>
+        <p>192x192 Icon</p>
+    </div>
+    
+    <div class="icon-container">
+        <canvas id="icon512" width="512" height="512"></canvas>
+        <p>512x512 Icon</p>
+    </div>
+
+    <script>
+        function createIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#10B981');
+            gradient.addColorStop(1, '#3B82F6');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add medical cross
+            ctx.fillStyle = 'white';
+            const crossSize = size * 0.6;
+            const crossThickness = size * 0.1;
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Horizontal bar
+            ctx.fillRect(centerX - crossSize/2, centerY - crossThickness/2, crossSize, crossThickness);
+            // Vertical bar
+            ctx.fillRect(centerX - crossThickness/2, centerY - crossSize/2, crossThickness, crossSize);
+            
+            // Add text
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.08}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText('EasyMed', centerX, centerY + crossSize/2 + size * 0.15);
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        // Create icons
+        const icon192 = createIcon('icon192', 192);
+        const icon512 = createIcon('icon512', 512);
+        
+        // Download function
+        function downloadIcon(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataUrl;
+            link.click();
+        }
+        
+        // Add download buttons
+        document.body.innerHTML += `
+            <div style="margin-top: 20px;">
+                <button onclick="downloadIcon('${icon192}', 'icon-192.png')">Download 192x192</button>
+                <button onclick="downloadIcon('${icon512}', 'icon-512.png')">Download 512x512</button>
+            </div>
+        `;
+    </script>
+</body>
+</html>

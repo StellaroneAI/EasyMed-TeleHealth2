@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="icon" type="image/svg+xml" href="/medical-icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EasyMedPro - AI Healthcare Platform</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3B82F6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="EasyMedPro" />
+    <meta name="application-name" content="EasyMedPro" />
+    <meta name="msapplication-TileColor" content="#3B82F6" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="/apple-touch-icon-152x152.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/apple-touch-icon-180x180.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="167x167"
+      href="/apple-touch-icon-167x167.png"
+    />
+
+    <!-- Splash Screen Images for iOS -->
+    <link
+      rel="apple-touch-startup-image"
+      href="/apple-splash-2048-2732.jpg"
+      sizes="2048x2732"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/apple-splash-1668-2224.jpg"
+      sizes="1668x2224"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/apple-splash-1536-2048.jpg"
+      sizes="1536x2048"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/apple-splash-1125-2436.jpg"
+      sizes="1125x2436"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/apple-splash-1242-2208.jpg"
+      sizes="1242x2208"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/apple-splash-750-1334.jpg"
+      sizes="750x1334"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/apple-splash-828-1792.jpg"
+      sizes="828x1792"
+    />
+
+    <!-- SEO and Description -->
+    <meta
+      name="description"
+      content="EasyMedPro - Comprehensive AI-powered healthcare platform with multilingual support, IoT integration, genetic insights, and personalized wellness coaching."
+    />
+    <meta
+      name="keywords"
+      content="healthcare, medical, AI, telemedicine, health monitoring, medication management, symptom checker, wellness coaching"
+    />
+    <meta name="author" content="EasyMedPro Team" />
+
+    <!-- Social Media Meta Tags -->
+    <meta property="og:title" content="EasyMedPro - AI Healthcare Platform" />
+    <meta
+      property="og:description"
+      content="Revolutionary healthcare platform with AI assistance, real-time monitoring, and personalized wellness coaching."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://easymedpro.com" />
+    <meta property="og:type" content="website" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EasyMedPro - AI Healthcare Platform" />
+    <meta
+      name="twitter:description"
+      content="Revolutionary healthcare platform with AI assistance, real-time monitoring, and personalized wellness coaching."
+    />
+    <meta name="twitter:image" content="/twitter-image.png" />
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((registration) => {
+              console.log("SW registered: ", registration);
+
+              // Check for updates
+              registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener("statechange", () => {
+                  if (
+                    newWorker.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    // New version available
+                    if (confirm("New version available! Reload to update?")) {
+                      newWorker.postMessage({ type: "SKIP_WAITING" });
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
+            })
+            .catch((registrationError) => {
+              console.log("SW registration failed: ", registrationError);
+            });
+        });
+      }
+
+      // Handle app install prompt
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log("Install prompt ready");
+      });
+
+      // Expose install function globally
+      window.installPWA = () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("User accepted the install prompt");
+            }
+            deferredPrompt = null;
+          });
+        }
+      };
+    </script>
+
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
